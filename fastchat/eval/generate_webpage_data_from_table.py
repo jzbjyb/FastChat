@@ -29,6 +29,7 @@ def trim_hanging_lines(s: str, n: int) -> str:
 if __name__ == "__main__":
     questions = read_jsonl("table/question.jsonl", key="question_id")
 
+    '''
     alpaca_answers = read_jsonl(
         "table/answer/answer_alpaca-13b.jsonl", key="question_id"
     )
@@ -51,9 +52,15 @@ if __name__ == "__main__":
     review_llama = read_jsonl(
         "table/review/review_llama-13b_vicuna-13b.jsonl", key="question_id"
     )
+    '''
+
+    zero_answers = read_jsonl("table/answer/0.jsonl", key="question_id")
+    one_answers = read_jsonl("table/answer/1.jsonl", key="question_id")
+    review_one = read_jsonl("table/review/1.jsonl", key="question_id")
 
     records = []
     for qid in questions.keys():
+        '''
         r = {
             "id": qid,
             "category": questions[qid]["category"],
@@ -78,6 +85,22 @@ if __name__ == "__main__":
                 "gpt35": review_gpt35[qid]["score"],
             },
         }
+        '''
+        r = {
+            "id": qid,
+            "category": questions[qid]["category"],
+            "question": questions[qid]["text"],
+            "answers": {
+                "one": one_answers[qid]["text"],
+                "zero": zero_answers[qid]["text"],
+            },
+            "evaluations": {
+                "one": review_one[qid]["text"],
+            },
+            "scores": {
+                "one": review_one[qid]["score"],
+            },
+        }
 
         # cleanup data
         cleaned_evals = {}
@@ -95,6 +118,7 @@ if __name__ == "__main__":
         r["evaluations"] = cleaned_evals
         records.append(r)
 
+    '''
     # Reorder the records, this is optional
     for r in records:
         if r["id"] <= 20:
@@ -111,6 +135,7 @@ if __name__ == "__main__":
             r["id"] = 1
         elif r["id"] < 7:
             r["id"] += 1
+    '''
 
     records.sort(key=lambda x: x["id"])
 
