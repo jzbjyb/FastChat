@@ -29,7 +29,7 @@ def trim_hanging_lines(s: str, n: int) -> str:
 if __name__ == "__main__":
     questions = read_jsonl("table/question.jsonl", key="question_id")
 
-    '''
+    
     alpaca_answers = read_jsonl(
         "table/answer/answer_alpaca-13b.jsonl", key="question_id"
     )
@@ -41,26 +41,28 @@ if __name__ == "__main__":
     )
 
     review_alpaca = read_jsonl(
-        "table/review/review_alpaca-13b_vicuna-13b.jsonl", key="question_id"
+        "table/review/vicuna-13b_20230322-clean-lang/review_alpaca-13b_vicuna-13b.jsonl", key="question_id"
     )
     review_bard = read_jsonl(
-        "table/review/review_bard_vicuna-13b.jsonl", key="question_id"
+        "table/review/vicuna-13b_20230322-clean-lang/review_bard_vicuna-13b.jsonl", key="question_id"
     )
     review_gpt35 = read_jsonl(
-        "table/review/review_gpt35_vicuna-13b.jsonl", key="question_id"
+        "table/review/vicuna-13b_20230322-clean-lang/review_gpt35_vicuna-13b.jsonl", key="question_id"
     )
     review_llama = read_jsonl(
-        "table/review/review_llama-13b_vicuna-13b.jsonl", key="question_id"
+        "table/review/vicuna-13b_20230322-clean-lang/review_llama-13b_vicuna-13b.jsonl", key="question_id"
     )
-    '''
+    
 
+    '''
     zero_answers = read_jsonl("table/answer/0.jsonl", key="question_id")
     one_answers = read_jsonl("table/answer/1.jsonl", key="question_id")
     review_one = read_jsonl("table/review/1.jsonl", key="question_id")
+    '''
 
     records = []
     for qid in questions.keys():
-        '''
+        
         r = {
             "id": qid,
             "category": questions[qid]["category"],
@@ -101,6 +103,7 @@ if __name__ == "__main__":
                 "one": review_one[qid]["score"],
             },
         }
+        '''
 
         # cleanup data
         cleaned_evals = {}
