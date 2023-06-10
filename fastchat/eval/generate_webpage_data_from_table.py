@@ -1,9 +1,9 @@
 """Generate json file for webpage."""
+from typing import List, Dict
 import json
 import os
 import re
-
-models = ["alpaca", "llama", "gpt35", "bard"]
+import sys
 
 
 def read_jsonl(path: str, key: str = None):
@@ -27,83 +27,26 @@ def trim_hanging_lines(s: str, n: int) -> str:
 
 
 if __name__ == "__main__":
-    questions = read_jsonl("table/question.jsonl", key="question_id")
+    table_root = sys.argv[1]
 
-    
-    alpaca_answers = read_jsonl(
-        "table/answer/answer_alpaca-13b.jsonl", key="question_id"
-    )
-    bard_answers = read_jsonl("table/answer/answer_bard.jsonl", key="question_id")
-    gpt35_answers = read_jsonl("table/answer/answer_gpt35.jsonl", key="question_id")
-    llama_answers = read_jsonl("table/answer/answer_llama-13b.jsonl", key="question_id")
-    vicuna_answers = read_jsonl(
-        "table/answer/answer_vicuna-13b.jsonl", key="question_id"
-    )
+    questions: Dict[str, Dict] = read_jsonl(f"{table_root}/question.jsonl", key="question_id")
+    models: List[str] = [json.loads(l)["model_id"] for l in open(f"{table_root}/model.jsonl")]
+    base_model: str = models[0]
+    compare_models: List[str] = models[1:]
 
-    review_alpaca = read_jsonl(
-        "table/review/vicuna-13b_20230322-clean-lang/review_alpaca-13b_vicuna-13b.jsonl", key="question_id"
-    )
-    review_bard = read_jsonl(
-        "table/review/vicuna-13b_20230322-clean-lang/review_bard_vicuna-13b.jsonl", key="question_id"
-    )
-    review_gpt35 = read_jsonl(
-        "table/review/vicuna-13b_20230322-clean-lang/review_gpt35_vicuna-13b.jsonl", key="question_id"
-    )
-    review_llama = read_jsonl(
-        "table/review/vicuna-13b_20230322-clean-lang/review_llama-13b_vicuna-13b.jsonl", key="question_id"
-    )
-    
-
-    '''
-    zero_answers = read_jsonl("table/answer/0.jsonl", key="question_id")
-    one_answers = read_jsonl("table/answer/1.jsonl", key="question_id")
-    review_one = read_jsonl("table/review/1.jsonl", key="question_id")
-    '''
+    model2answers: Dict[str, Dict] = {model: read_jsonl(f"{table_root}/answer/{model}.jsonl", key="question_id") for model in models}
+    model2reviews: Dict[str, Dict] = {model: read_jsonl(f"{table_root}/review/{model}.jsonl", key="question_id") for model in compare_models}
 
     records = []
     for qid in questions.keys():
-        
         r = {
             "id": qid,
             "category": questions[qid]["category"],
             "question": questions[qid]["text"],
-            "answers": {
-                "alpaca": alpaca_answers[qid]["text"],
-                "llama": llama_answers[qid]["text"],
-                "bard": bard_answers[qid]["text"],
-                "gpt35": gpt35_answers[qid]["text"],
-                "vicuna": vicuna_answers[qid]["text"],
-            },
-            "evaluations": {
-                "alpaca": review_alpaca[qid]["text"],
-                "llama": review_llama[qid]["text"],
-                "bard": review_bard[qid]["text"],
-                "gpt35": review_gpt35[qid]["text"],
-            },
-            "scores": {
-                "alpaca": review_alpaca[qid]["score"],
-                "llama": review_llama[qid]["score"],
-                "bard": review_bard[qid]["score"],
-                "gpt35": review_gpt35[qid]["score"],
-            },
+            "answers": {model: ans[qid]["text"] for model, ans in model2answers.items()},
+            "evaluations": {model: ans[qid]["text"] for model, ans in model2reviews.items()},
+            "scores": {model: ans[qid]["score"] for model, ans in model2reviews.items()},
         }
-        '''
-        r = {
-            "id": qid,
-            "category": questions[qid]["category"],
-            "question": questions[qid]["text"],
-            "answers": {
-                "one": one_answers[qid]["text"],
-                "zero": zero_answers[qid]["text"],
-            },
-            "evaluations": {
-                "one": review_one[qid]["text"],
-            },
-            "scores": {
-                "one": review_one[qid]["score"],
-            },
-        }
-        '''
 
         # cleanup data
         cleaned_evals = {}
@@ -143,5 +86,5 @@ if __name__ == "__main__":
     records.sort(key=lambda x: x["id"])
 
     # Write to file
-    with open("webpage/data.json", "w") as f:
+    with open(f"{table_root}/data.json", "w") as f:
         json.dump({"questions": records, "models": models}, f, indent=2)
