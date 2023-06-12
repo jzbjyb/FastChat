@@ -26,6 +26,11 @@ def trim_hanging_lines(s: str, n: int) -> str:
     return s
 
 
+def clean_retrieval(example):
+    qds = example["metadata"]["retrieval_queries_docs"]
+    return [(q, [(d['body'], d['score']) for d in ds]) for q, ds in qds]
+
+
 if __name__ == "__main__":
     table_root = sys.argv[1]
 
@@ -44,6 +49,7 @@ if __name__ == "__main__":
             "category": questions[qid]["category"],
             "question": questions[qid]["text"],
             "answers": {model: ans[qid]["text"] for model, ans in model2answers.items()},
+            "retrieval": {model: clean_retrieval(ans[qid]) for model, ans in model2answers.items()},
             "evaluations": {model: ans[qid]["text"] for model, ans in model2reviews.items()},
             "scores": {model: ans[qid]["score"] for model, ans in model2reviews.items()},
         }

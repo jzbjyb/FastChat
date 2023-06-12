@@ -511,5 +511,7 @@ if __name__ == "__main__":
     conv.append_message(conv.roles[0], "Hello!")
     conv.append_message(conv.roles[1], "Hi!")
     conv.append_message(conv.roles[0], "How are you?")
+    conv.append_message(conv.roles[1], "I'm great!")
+    conv.append_message(conv.roles[0], "Could you help me with this?")
     conv.append_message(conv.roles[1], None)
     print(conv.get_prompt())
