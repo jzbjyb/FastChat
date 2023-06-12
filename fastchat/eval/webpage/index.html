@@ -70,7 +70,7 @@
             </div>
             <div class="col">
                 <div class="vertical-flex-layout">
-                    <img class="shadow figure-img img-fluid" src="figures/vicuna.jpeg" alt="vicuna logo" width="150" id="our-model-figure">
+                    <img class="shadow figure-img img-fluid" src="" alt="base logo" width="150" id="our-model-figure">
                 </div>
             </div>
             <div class="col" style="display: flex; justify-content: center; align-items: center;">
@@ -148,11 +148,14 @@
     <script src="script.js"></script>
     <script>
       // Fetch the JSON file
-      fetch('data.json')
+      const queryString = window.location.search;
+      console.log(queryString);
+      const urlParams = new URLSearchParams(queryString);
+      fetch('data/' + urlParams.get('data') + '.json')
         .then(response => response.json())
         .then(json_data => {
             // Populate the models and questions.
-            populateModels(json_data.models);
+            populateModels(json_data.models, json_data.base_model);
             populateQuestions(json_data.questions);
             displayQuestion(currentQuestionIndex);
         }).catch(error => console.error(error));

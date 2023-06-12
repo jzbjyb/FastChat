@@ -1,7 +1,5 @@
 // Description: Script for the evaluation webpage.
 
-let currentQuestionIndex = 1;
-
 // Store the model name mapping for later use.
 modelNameMapping = {
     "gpt35": "ChatGPT-3.5",
@@ -26,11 +24,15 @@ modelFigureMapping = {
 
 // Store the question data in a mapping for later use.
 questionMapping = {};
+all_questionids = []
+let currentQuestionIndex = -1;
+let ques_ind = 0;
 // Store the question ids in a mapping for later use.
 categoryMapping = {};
 // Store the number of questions for later use.
 questionsCount = 0;
-
+// Store model names
+modelMapping = {'base': ''}
 
 function text2Markdown(text) {
     // Normalize the text for markdown rendering.
@@ -55,7 +57,8 @@ function updateQuestionSelect(question_id) {
         const question = questionMapping[question_id];
         const option = document.createElement('option');
         option.value = question_id;
-        option.textContent = 'Q' + question_id.toString() + ': ' + question.question;
+        //option.textContent = 'Q' + question_id.toString() + ': ' + question.question;
+        option.textContent = 'Q: ' + question.question;
         select.appendChild(option);
     });
     select.value = question_id;
@@ -67,12 +70,13 @@ function updateModelSelect() {
     document.getElementById('other-model-figure').src = img_path;
 }
 
-function populateModels(models) {
+function populateModels(models, base_model) {
+    modelMapping['base'] = base_model
     const select = document.getElementById('model-select');
     models.forEach(model => {
         const option = document.createElement('option');
         option.value = model;
-        option.textContent = modelNameMapping[model];
+        option.textContent = model;
         select.appendChild(option);
     });
     updateModelSelect();
@@ -85,6 +89,7 @@ function populateQuestions(questions) {
     questions.forEach(question => {
         const option = document.createElement('option');
         // Store the question data in a mapping for later use.
+        all_questionids.push(question.id)
         questionMapping[question.id] = {
             category: question.category,
             question: question.question,
@@ -104,6 +109,7 @@ function populateQuestions(questions) {
         }
     });
     // Set the default category.
+    currentQuestionIndex = all_questionids[ques_ind]
     updateQuestionSelect(currentQuestionIndex);
 }
 
@@ -118,17 +124,17 @@ function displayAnswers(index) {
     const otherModel = document.getElementById('model-select').value;
     // render the answers with markdown
     document.getElementById('other-model-answer').innerHTML = text2Markdown(question.answers[otherModel]);
-    document.getElementById('our-model-answer').innerHTML = text2Markdown(question.answers.vicuna);
+    document.getElementById('our-model-answer').innerHTML = text2Markdown(question.answers[modelMapping['base']]);
 
     // Display evaluation
     score = question.scores[otherModel];
-    score_text = modelNameMapping[otherModel] + " " + score[0] + "/10, Vicuna-13b " + score[1] + "/10";
+    score_text = otherModel + " " + score[0] + "/10, " + modelMapping['base'] + " " + score[1] + "/10";
     document.getElementById('evaluation-header').textContent = "GPT-4 Evaluation" + " (Score: " + score_text + ")";
     document.getElementById('evaluation-result').innerHTML = text2Markdown(question.evaluations[otherModel]);
 
     // Update model names
     let assistant1_title = "Assistant #1"; // (" + modelNameMapping[otherModel] + ")";
-    let assistant2_title = "Assistant #2 (Vicuna-13b, our model)";
+    let assistant2_title = "Assistant #2 " + modelMapping['base'];
     // Update scores/labels.
     let assistant1_score_label = score[0].toString() + '/10';
     let assistant2_score_label = score[1].toString() + '/10';
@@ -179,7 +185,8 @@ function displayAnswers(index) {
 }
 
 document.getElementById('question-select').addEventListener('change', e => {
-    currentQuestionIndex = parseInt(e.target.value);
+    currentQuestionIndex = e.target.value;
+    ques_ind = all_questionids.indexOf(currentQuestionIndex);
     displayQuestion(currentQuestionIndex);
 });
 
@@ -187,6 +194,7 @@ document.getElementById('category-select').addEventListener('change', e => {
     let currentCategory = e.target.value;
     const questionIds = categoryMapping[currentCategory];
     currentQuestionIndex = questionIds[0];
+    ques_ind = all_questionids.indexOf(currentQuestionIndex);
     updateQuestionSelect(currentQuestionIndex);
     displayQuestion(currentQuestionIndex);
 });
@@ -211,15 +219,19 @@ function switchQuestionAndCategory() {
     displayQuestion(currentQuestionIndex);
 }
 
+// TODO: not working
 document.getElementById('prev-question').addEventListener('click', () => {
     // Question index starts from 1.
-    currentQuestionIndex = Math.max(1, currentQuestionIndex - 1);
+    ques_ind = Math.max(0, ques_ind - 1);
+    currentQuestionIndex = all_questionids[ques_ind];
     switchQuestionAndCategory();
 });
 
+// TODO: not working
 document.getElementById('next-question').addEventListener('click', () => {
     // Question index starts from 1.
-    currentQuestionIndex = Math.min(questionsCount, currentQuestionIndex + 1);
+    ques_ind = Math.min(questionsCount, ques_ind + 1);
+    currentQuestionIndex = all_questionids[ques_ind];
     switchQuestionAndCategory();
 });
 
