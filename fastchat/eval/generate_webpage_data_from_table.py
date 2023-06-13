@@ -28,7 +28,7 @@ def trim_hanging_lines(s: str, n: int) -> str:
 
 def clean_retrieval(example):
     qds = example["metadata"]["retrieval_queries_docs"]
-    return [(q, [(d['body'], d['score']) for d in ds]) for q, ds in qds]
+    return [(q, [{k: d[k] for k in ['score', 'body', 'title']} for d in ds]) for q, ds in qds]
 
 
 if __name__ == "__main__":
@@ -93,4 +93,4 @@ if __name__ == "__main__":
 
     # Write to file
     with open(f"{table_root}/data.json", "w") as f:
-        json.dump({"questions": records, "models": models}, f, indent=2)
+        json.dump({"questions": records, "models": compare_models, "base_model": base_model}, f, indent=2)
