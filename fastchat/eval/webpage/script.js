@@ -94,6 +94,7 @@ function populateQuestions(questions) {
             category: question.category,
             question: question.question,
             answers: question.answers,
+            retrieval: question.retrieval,
             evaluations: question.evaluations,
             scores: question.scores,
         };
@@ -182,6 +183,67 @@ function displayAnswers(index) {
         const expandBtn = card.querySelector('.expand-btn');
         expandBtn.innerHTML = '<i class="material-icons" style="pointer-events: none">keyboard_arrow_down</i> Show more';   // .textContent = 'Show more';
     });
+
+    displayRetrieval(index)
+}
+
+function displayRetrieval(index) {
+    const question = questionMapping[index];
+    const otherModel = document.getElementById('model-select').value;
+
+    // populate retrieval of other model
+    const otherSelect = document.getElementById('other-retrieval-select');
+    otherSelect.innerHTML = '';
+    question.retrieval[otherModel].forEach(function (ret, ind) {
+        const option = document.createElement('option');
+        option.value = ind;
+        option.textContent = "Query " + ind + ": " + ret[0];
+        otherSelect.appendChild(option);
+    });
+    displayRetrievalDocuments(index, 'other')
+
+    // populate retrieval of base model
+    const ourSelect = document.getElementById('our-retrieval-select');
+    ourSelect.innerHTML = '';
+    question.retrieval[modelMapping['base']].forEach(function (ret, ind) {
+        const option = document.createElement('option');
+        option.value = ind;
+        option.textContent = "Query " + ind + ": " + ret[0];
+        ourSelect.appendChild(option);
+    });
+    displayRetrievalDocuments(index, 'our')    
+}
+
+function displayRetrievalDocuments(index, modelCate) {
+    const question = questionMapping[index];
+    if (modelCate == "other") {
+        model = document.getElementById('model-select').value;
+        ret = document.getElementById('other-retrieval-select').value;
+        document.getElementById('other-model-retrieval').innerHTML = "";
+    } else {
+        model = modelMapping['base'];
+        ret = document.getElementById('our-retrieval-select').value;
+        document.getElementById('our-model-retrieval').innerHTML = "";
+    };
+    
+    if (ret == "") {
+        return
+    };
+
+    query = question.retrieval[model][ret][0];
+    docs = question.retrieval[model][ret][1].slice(0, 5);  // show at most 5 docs
+    let linearized_docs = docs.reduce(function(linearized, doc, ind, array) {
+        title = doc["title"];
+        text = doc["body"];
+        score = doc["score"];
+        return linearized + "\n#### Doc " + (ind + 1) + "\n**Title: " + title + "** (score: " + score + ")\n" + text;
+    }, "**Query: " + query + "**");
+
+    if (modelCate == "other") {
+        document.getElementById('other-model-retrieval').innerHTML = text2Markdown(linearized_docs);
+    } else {
+        document.getElementById('our-model-retrieval').innerHTML = text2Markdown(linearized_docs);
+    };
 }
 
 document.getElementById('question-select').addEventListener('change', e => {
@@ -233,6 +295,14 @@ document.getElementById('next-question').addEventListener('click', () => {
     ques_ind = Math.min(questionsCount, ques_ind + 1);
     currentQuestionIndex = all_questionids[ques_ind];
     switchQuestionAndCategory();
+});
+
+document.getElementById('other-retrieval-select').addEventListener('change', e => {
+    displayRetrievalDocuments(currentQuestionIndex, 'other');
+});
+
+document.getElementById('our-retrieval-select').addEventListener('change', e => {
+    displayRetrievalDocuments(currentQuestionIndex, 'our');
 });
 
 function updateExpandButtonVisibility(card) {

@@ -108,11 +108,55 @@
             <div class="col-md-6">
                 <div class="card mb-4 expandable-card">
                     <div class="card-header" id="our-model-header">
-                        Assistant #2 (Vicuna, our model)
+                        Assistant #2
                     </div>
                     <div class="card-body">
                         <div class="card-text-container">
                             <div class="card-text" id="our-model-answer"></div>
+                        </div>
+                        <div class="btn btn-primary expand-btn" style="display:flex;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Retrieval Cards -->
+         <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4 expandable-card">
+                    <div class="card-header" style="padding-bottom: 0.2rem" id="other-model-header-bg-ret">
+                        <div class="row">
+                            <div class="col-md-5" style="align-items: center; display: flex;">
+                                <label id="other-model-header-ret">Assistant #1 Retrieval</label>
+                            </div>
+                            <div class="col-md-7">
+                                <select class="form-control" id="other-retrieval-select" style="height: fit-content; margin-top: -0.3rem;"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-text-container">
+                            <div class="card-text" id="other-model-retrieval"></div>
+                        </div>
+                        <div class="btn btn-primary expand-btn" style="display:flex;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4 expandable-card">
+                    <div class="card-header" style="padding-bottom: 0.2rem" id="our-model-header-bg-ret">
+                        <div class="row">
+                            <div class="col-md-5" style="align-items: center; display: flex;">
+                                <label id="our-model-header-ret">Assistant #2 Retrieval</label>
+                            </div>
+                            <div class="col-md-7">
+                                <select class="form-control" id="our-retrieval-select" style="height: fit-content; margin-top: -0.3rem;"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-text-container">
+                            <div class="card-text" id="our-model-retrieval"></div>
                         </div>
                         <div class="btn btn-primary expand-btn" style="display:flex;"></div>
                     </div>
@@ -149,7 +193,6 @@
     <script>
       // Fetch the JSON file
       const queryString = window.location.search;
-      console.log(queryString);
       const urlParams = new URLSearchParams(queryString);
       fetch('data/' + urlParams.get('data') + '.json')
         .then(response => response.json())
