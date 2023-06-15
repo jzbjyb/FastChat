@@ -48,6 +48,7 @@ if __name__ == "__main__":
             "id": qid,
             "category": questions[qid]["category"],
             "question": questions[qid]["text"],
+            "prompts": {model: ans[qid]["metadata"]["prompt"] for model, ans in model2answers.items()},
             "answers": {model: ans[qid]["text"] for model, ans in model2answers.items()},
             "retrieval": {model: clean_retrieval(ans[qid]) for model, ans in model2answers.items()},
             "evaluations": {model: ans[qid]["text"] for model, ans in model2reviews.items()},
