@@ -94,6 +94,7 @@ function populateQuestions(questions) {
             category: question.category,
             question: question.question,
             answers: question.answers,
+            prompts: question.prompts,
             retrieval: question.retrieval,
             evaluations: question.evaluations,
             scores: question.scores,
@@ -124,8 +125,14 @@ function displayAnswers(index) {
     const question = questionMapping[index];
     const otherModel = document.getElementById('model-select').value;
     // render the answers with markdown
-    document.getElementById('other-model-answer').innerHTML = text2Markdown(question.answers[otherModel]);
-    document.getElementById('our-model-answer').innerHTML = text2Markdown(question.answers[modelMapping['base']]);
+    document.getElementById('other-model-answer').innerHTML = text2Markdown('**Answer**\n' + question.answers[otherModel]);
+    document.getElementById('our-model-answer').innerHTML = text2Markdown('**Answer**\n' + question.answers[modelMapping['base']]);
+
+    // render prompts
+    if (question.prompts) {
+        document.getElementById('other-model-prompt').innerHTML = text2Markdown('**Prompt**\n' + question.prompts[otherModel]);
+        document.getElementById('our-model-prompt').innerHTML = text2Markdown('**Prompt**\n' + question.prompts[modelMapping['base']]);
+    }
 
     // Display evaluation
     score = question.scores[otherModel];
@@ -180,8 +187,7 @@ function displayAnswers(index) {
     document.querySelectorAll('.expandable-card').forEach(card => {
         card.classList.remove('expanded');
         updateExpandButtonVisibility(card);
-        const expandBtn = card.querySelector('.expand-btn');
-        expandBtn.innerHTML = '<i class="material-icons" style="pointer-events: none">keyboard_arrow_down</i> Show more';   // .textContent = 'Show more';
+        card.querySelector('.expand-btn').innerHTML = '<i class="material-icons" style="pointer-events: none">keyboard_arrow_down</i> Show more';   // .textContent = 'Show more';
     });
 
     displayRetrieval(index)
@@ -306,19 +312,20 @@ document.getElementById('our-retrieval-select').addEventListener('change', e => 
 });
 
 function updateExpandButtonVisibility(card) {
-    const cardTextContainer = card.querySelector('.card-text-container');
-    const expandBtn = card.querySelector('.expand-btn');
-    if (cardTextContainer.scrollHeight > cardTextContainer.offsetHeight) {
-        expandBtn.style.display = 'flex';
-    } else {
-        expandBtn.style.display = 'none';
-        card.classList.add('expanded');
-    }
+    ctc = card.querySelector('.card-text-container');
+    btn = card.querySelector('.expand-btn');
+    btn.style.display = 'flex';
+    //if (ctc.scrollHeight > ctc.offsetHeight) {
+    //    btn.style.display = 'flex';
+    //} else {
+    //    btn.style.display = 'none';
+    //    card.classList.add('expanded');
+    //}
 }
 
 document.querySelectorAll('.expand-btn').forEach(btn => {
     btn.addEventListener('click', e => {
-        const card = e.target.closest('.expandable-card');
+        card = e.target.closest('.expandable-card');
         card.classList.toggle('expanded');
         const more = '<i class="material-icons" style="pointer-events: none">keyboard_arrow_down</i> Show more';
         const less = '<i class="material-icons" style="pointer-events: none">keyboard_arrow_up</i> Show less';
